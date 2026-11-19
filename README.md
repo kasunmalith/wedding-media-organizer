@@ -1,2 +1,124 @@
-# wedding-media-organizer
-Eon Episode Wedding Media File Organizer — safety-first offline Windows app, Python source and portable executable.
+<div align="center">
+  <img src="assets/eon.png" alt="Eon Episode Weddings" width="190" />
+
+  # Eon Episode — Wedding Media File Organizer
+
+  **A safety-first, offline Windows application for organizing professional wedding backups.**
+
+  [![Windows 10 / 11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](#download)
+  [![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](#run-from-source)
+  [![PySide6](https://img.shields.io/badge/UI-PySide6-41CD52?logo=qt&logoColor=white)](#technology)
+  [![Offline](https://img.shields.io/badge/processing-offline-176B55)](#privacy)
+
+  [Download portable EXE](https://github.com/kasunmalith/wedding-media-organizer/releases/latest/download/WeddingMediaOrganizer.exe) · [Releases](https://github.com/kasunmalith/wedding-media-organizer/releases) · [Report an issue](https://github.com/kasunmalith/wedding-media-organizer/issues)
+</div>
+
+---
+
+## About
+
+Wedding Media File Organizer scans a wedding backup recursively, previews every planned destination, then safely sorts camera media and supporting files inside that same wedding folder. It is designed for photography and cinematography teams that bring several camera cards together before post-production.
+
+The application works offline. Media stays on the selected computer or drive. It does not edit image, video or audio contents, rename files, overwrite collisions, or remove originals. The portable release bundles Python and Qt into a **single Windows executable**.
+
+## Download
+
+1. Download [`WeddingMediaOrganizer.exe`](https://github.com/kasunmalith/wedding-media-organizer/releases/latest/download/WeddingMediaOrganizer.exe) from the latest GitHub release.
+2. Copy the executable to a Windows 10 or Windows 11, 64-bit computer.
+3. Double-click it. No Python installation, installer, internet access, or additional runtime folder is required.
+
+The first launch extracts its bundled runtime to the Windows temporary directory and can take a few seconds. The executable is unsigned, so Windows SmartScreen may show its standard warning.
+
+> **Source version:** [`WeddingMediaOrganizer.py`](WeddingMediaOrganizer.py) is the self-contained Python application. The maintainable module-based source is in [`wedding_organizer/`](wedding_organizer/). Both include the Eon Episode logo and Energetic Edge software credit.
+
+## Organize a wedding backup
+
+1. Copy the camera cards into a wedding backup folder. Keep a separate backup of irreplaceable originals.
+2. Open the organizer, choose **Select Wedding Folder**, and select the wedding backup root.
+3. Choose **Scan Files**. Scanning is read-only.
+4. Inspect **File preview**, **Original folders**, and **Scan issues**. Search filenames and paths, and filter by file type.
+5. Choose **Organize Files**. Check the summary and confirm to begin.
+6. Review the progress, session results and external log. For unresolved files, resolve the reported collision or filesystem problem and scan again.
+
+### Destination layout
+
+| Files discovered in the wedding folder | Planned destination |
+|---|---|
+| `.NEF`, `.ARW`, `.CR2`, `.CR3`, `.DNG`, `.RAF`, `.ORF`, `.RW2` | `Photos/Raw/<camera prefix>/<original filename>` |
+| `.JPG`, `.JPEG` | `Photos/Jpg/<camera prefix>/<original filename>` |
+| `.MP4`, `.MOV` | `Videography/<camera prefix>/<original filename>` |
+| `.WAV` | `Videography/Audio/<original filename>` |
+| Other file types, including `.XMP`, `.XML`, `.TXT`, `.PDF`, `.DAT`, `.THM`, `.LRV`, `.AAE`, `.DSC` | `Other Files/<original relative path>` |
+| Remaining original top-level folders | `Other Folders/<original folder name>` |
+
+Extensions are case-insensitive. Camera folders use the first three ASCII letters or digits after any leading underscores, converted to uppercase. For example, `_MSP7396.NEF` goes under `Photos/Raw/MSP/` and retains its original filename. WAV files do not need a camera prefix.
+
+Root-level `DCIM`, `NIKON`, `2`, `6g`, `f9`, `L8`, and `r3` folders are scanned just like other source folders. Files in those folders are classified first; then eligible remaining original folders move to **Other Folders**, with their empty nested structure preserved. An unrelated nested source folder named `Photos` or `Videography` is still scanned.
+
+## Safety and privacy
+
+- The complete scan and preview finish before any organization starts.
+- Symbolic links, junctions, mount points and other reparse points are not followed. Filesystem boundaries are reported.
+- The Windows filesystem performs no-replace rename operations. Existing files and directories are never overwritten, merged, or silently renamed.
+- The app checks source and destination paths and revalidates the source immediately before each move. Cross-volume copy-and-delete fallback is refused.
+- If the same target filename is generated by multiple source files, or an existing destination conflicts, the source remains where it is and the conflict appears in the preview and report.
+- Original folders move only after file operations finish successfully. Folders containing unresolved content stay in their original location.
+- A detailed JSON Lines session log is kept under `%LOCALAPPDATA%\WeddingMediaOrganizer\Logs`, outside the wedding backup. The app does not upload media, metadata, logs, or telemetry.
+
+**Recommended:** keep an independent copy of the original wedding backup. Filesystems and physical drives can fail; the application cannot provide an all-or-nothing transaction across power loss or hardware failure. Do not edit the selected backup while the organizer is running. See [the safety details](WeddingMediaOrganizer/README.md#safety-design) for filesystem behavior and limits.
+
+## Features
+
+- Recursively discovers supported files at any folder depth without scanning generated destination folders again.
+- Separates RAW photos, JPEGs, video, WAV audio and other files.
+- Groups photo/video files by detected camera prefix, including underscore-prefixed names.
+- Preserves the source-relative path of miscellaneous files under **Other Files**.
+- Previews file moves, file sizes, warnings, filename collisions and original-folder moves.
+- Shows scan totals, detected camera prefixes, total media size and planned work.
+- Runs scanning and organization in background workers with progress, stop control and completion results.
+- Supports repeated runs for new files added after an earlier organization session.
+- Exports a CSV report without replacing an existing file.
+- Shows the Eon Episode logo, provides the Energetic Edge website link, and works without a network connection.
+
+## Build from source
+
+The bundled executable is the easiest option. To edit the source or make a new portable build, use a 64-bit Windows PC and Python 3.12 or newer. Building needs internet access to install packages; running the finished application does not.
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.venv\Scripts\python.exe -m pytest -q
+.venv\Scripts\python.exe -m PyInstaller --noconfirm WeddingMediaOrganizer-portable.spec
+```
+
+The one-file executable is produced in `dist/WeddingMediaOrganizer.exe`. `build-portable.ps1` runs the tests, creates the single-file Windows build and checks the packaged GUI using temporary dummy files. Do not distribute the ordinary directory build when a one-file portable executable is required.
+
+### Technology
+
+Python 3.12+, PySide6 / Qt 6, Python `pathlib`, Windows `CreateFileW` and `SetFileInformationByHandle`, PyInstaller, pytest. No database, web server, cloud service, paid API or account is required.
+
+## Project structure
+
+```text
+WeddingMediaOrganizer.py          Single-file Python application
+main.py                            Module-based app entry point
+wedding_organizer/                 UI, scan planner and safe move engine
+tests/                             Temporary dummy-file and GUI tests
+assets/eon.png                     Transparent Eon Episode logo
+assets/eon.ico                     Windows executable icon
+third_party/                       License and attribution notices
+requirements.txt                   Runtime dependency
+requirements-dev.txt               Test and build dependencies
+WeddingMediaOrganizer-portable.spec PyInstaller single-file build
+build-portable.ps1                 Windows build and verification script
+```
+
+## Validation
+
+The project was developed and the portable executable was verified on Windows 11 x64. Automated checks use temporary dummy files, including tests for nested `DCIM`/`NIKON` folders, destination races, exFAT file-ID changes, recovery after interruption, source preservation, the GUI flow, transparent branding and underscore-prefixed camera names. One test may skip when Windows symbolic-link creation is disabled; junction checks are included. Windows 10 and other physical drive configurations still require deployment testing.
+
+## Branding
+
+**Software Development by [Energetic Edge (Pvt) Ltd](https://www.energeticedge.lk/)**
+
+The application and supplied Eon Episode logo are for Eon Episode Weddings. All rights are reserved unless otherwise stated. Third-party library licenses and notices are listed in [`third_party/`](third_party/).
