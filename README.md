@@ -65,7 +65,7 @@ Root-level `DCIM`, `NIKON`, `2`, `6g`, `f9`, `L8`, and `r3` folders are scanned 
 - Original folders move only after file operations finish successfully. Folders containing unresolved content stay in their original location.
 - A detailed JSON Lines session log is kept under `%LOCALAPPDATA%\WeddingMediaOrganizer\Logs`, outside the wedding backup. The app does not upload media, metadata, logs, or telemetry.
 
-**Recommended:** keep an independent copy of the original wedding backup. Filesystems and physical drives can fail; the application cannot provide an all-or-nothing transaction across power loss or hardware failure. Do not edit the selected backup while the organizer is running. See [the safety details](WeddingMediaOrganizer/README.md#safety-design) for filesystem behavior and limits.
+**Recommended:** keep an independent copy of the original wedding backup. Filesystems and physical drives can fail; the application cannot provide an all-or-nothing transaction across power loss or hardware failure. Do not edit the selected backup while the organizer is running. See the [safety and privacy details](#safety-and-privacy) for filesystem behavior and limits.
 
 ## Features
 
